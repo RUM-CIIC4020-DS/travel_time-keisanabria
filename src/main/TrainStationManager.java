@@ -11,13 +11,17 @@ import java.io.IOException;
 
 import data_structures.HashTableSC;
 import data_structures.SimpleHashFunction;
+import data_structures.ArrayList;
+import main.Station;
 
 public class TrainStationManager {
 	
 	private Map<String, List<Station>> stations = new HashTableSC<>(1, new SimpleHashFunction<>());
 	private String[] parts;
 	private String src_city;
-	private String station;
+	private String stationString;
+//	private Station station = new Station("Temporary city", 0); // Temporary initialization
+	private List<Station> temp = new ArrayList<Station>();
 	// Initiate Map<String, Station> shortRoutes
 	
 	/* Reads the file given by station_file and populates the stations map */
@@ -30,16 +34,28 @@ public class TrainStationManager {
             int lineNum = 1;
             while ((line = reader.readLine()) != null) {
                 if(lineNum != 1) { // If it is the first line, it skips it
-                	// If it contains key (use containsKey method), just add the dest_city to the List<Station>
+                	
+                	// If it contains key (use containsKey method), just add the dest_city + dist to the List<Station>
                 	// Else, add the key
                 	
                 	parts = line.split(",", 2);
                 	src_city = parts[0];
-                	station = parts[1];
-                	if(stations.containsKey( /* dest_city */ )) {
-                		
+                	stationString = parts[1];
+                	
+                	Station station = new Station(stationString.split(",")[0], Integer.parseInt(stationString.split(",")[1]));
+                	
+//                	station.setCityName(stationString.split(",")[0]);
+//                	station.setDistance(Integer.parseInt(stationString.split(",")[1]));
+                	if(stations.containsKey(src_city)) {
+                		temp = stations.get(src_city);
+                		temp.add(station);
+                		stations.put(src_city, temp);
+                		temp.clear();
+                	} else {
+                		temp.add(station);
+                		stations.put(src_city, temp);
+                		temp.clear();
                 	}
-                	stations.put( , );
                 }
                 lineNum++;
             }
@@ -52,12 +68,13 @@ public class TrainStationManager {
 	 * the logic given in the “Shortcuts to Victory” section. It populates
 	 * the shortest route map. */
 	private void findShortestDistance() {
-				
+
 	}
 
 	/* Receives a Stack that needs to remain sorted and the station we want to add. */
 	public void sortStack(Station station, Stack<Station> stackToSort) {
 		// Create alg to keep the stack sorted (Reference: "How do we keep the stack sorted?" section)
+		
 	}
 	
 	/*  Returns a Map where the key is the station name, and the value is 
@@ -70,7 +87,7 @@ public class TrainStationManager {
 
 
 	public Map<String, List<Station>> getStations() {
-		
+		return this.stations;
 	}
 
 
