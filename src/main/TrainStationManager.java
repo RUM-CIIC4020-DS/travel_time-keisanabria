@@ -21,7 +21,6 @@ public class TrainStationManager {
 	private String src_city;
 	private String stationString;
 //	private Station station = new Station("Temporary city", 0); // Temporary initialization
-	private List<Station> temp = new ArrayList<Station>();
 	// Initiate Map<String, Station> shortRoutes
 	
 	/* Reads the file given by station_file and populates the stations map */
@@ -29,7 +28,7 @@ public class TrainStationManager {
 		/* Calls findShortestDistance() for "Westside" so that the shortest
 		routes will be in reference to Westside. */
 		
-		try (BufferedReader reader = new BufferedReader(new FileReader(station_file))) {
+		try (BufferedReader reader = new BufferedReader(new FileReader("inputFiles/" + station_file))) {
             String line;
             int lineNum = 1;
             while ((line = reader.readLine()) != null) {
@@ -43,6 +42,7 @@ public class TrainStationManager {
                 	stationString = parts[1];
                 	
                 	Station station = new Station(stationString.split(",")[0], Integer.parseInt(stationString.split(",")[1]));
+                	List<Station> temp = new ArrayList<Station>();
                 	
 //                	station.setCityName(stationString.split(",")[0]);
 //                	station.setDistance(Integer.parseInt(stationString.split(",")[1]));
@@ -50,11 +50,9 @@ public class TrainStationManager {
                 		temp = stations.get(src_city);
                 		temp.add(station);
                 		stations.put(src_city, temp);
-                		temp.clear();
                 	} else {
                 		temp.add(station);
                 		stations.put(src_city, temp);
-                		temp.clear();
                 	}
                 }
                 lineNum++;
@@ -97,6 +95,7 @@ public class TrainStationManager {
 
 
 	public Map<String, Station> getShortestRoutes() {
+		return null;
 		
 	}
 
