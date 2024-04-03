@@ -42,7 +42,9 @@ public class TrainStationManager {
                 	stationString = parts[1];
                 	
                 	Station station = new Station(stationString.split(",")[0], Integer.parseInt(stationString.split(",")[1]));
+                	Station srcCityStation = new Station(src_city, Integer.parseInt(stationString.split(",")[1]));
                 	List<Station> temp = new ArrayList<Station>();
+                	List<Station> srcCityTemp = new ArrayList<Station>();
                 	
 //                	station.setCityName(stationString.split(",")[0]);
 //                	station.setDistance(Integer.parseInt(stationString.split(",")[1]));
@@ -50,9 +52,17 @@ public class TrainStationManager {
                 		temp = stations.get(src_city);
                 		temp.add(station);
                 		stations.put(src_city, temp);
+                	} if(stations.containsKey(stationString.split(",")[0])) { 
+                		/* Checks if the dest_city is a key in the map as well */
+                		
+                		srcCityTemp = stations.get(stationString.split(",")[0]);
+                		srcCityTemp.add(srcCityStation);
+                		stations.put(stationString.split(",")[0], srcCityTemp);
                 	} else {
                 		temp.add(station);
                 		stations.put(src_city, temp);
+                		srcCityTemp.add(srcCityStation);
+                		stations.put(stationString.split(",")[0], srcCityTemp);
                 	}
                 }
                 lineNum++;
