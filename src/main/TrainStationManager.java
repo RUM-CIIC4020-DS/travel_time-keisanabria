@@ -8,13 +8,13 @@ import interfaces.Stack;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Iterator; // Only for the main method! Remove before submitting
 
 import data_structures.HashTableSC;
 import data_structures.SimpleHashFunction;
 import data_structures.ArrayList;
 import main.Station;
 import data_structures.LinkedStack;
+import data_structures.HashSet;
 
 public class TrainStationManager {
 	
@@ -27,6 +27,8 @@ public class TrainStationManager {
 	private Map<String, Station> shortRoutes = new HashTableSC<>(1, new SimpleHashFunction<>()); 
 	private Stack<Station> sortedStack = new LinkedStack<Station>();
 	private Stack<Station> tempStack = new LinkedStack<Station>();
+	private Stack<Station> toVisit = new LinkedStack<Station>();
+	private HashSet<Station> visited = new HashSet<Station>();
 	
 	/* Method: Reads the file given by station_file and populates the stations map */
 	public TrainStationManager(String station_file) {
@@ -81,7 +83,17 @@ public class TrainStationManager {
 	 * the logic given in the “Shortcuts to Victory” section. It populates
 	 * the shortest route map. */
 	private void findShortestDistance() {
+		List<String> stationsKeys = stations.getKeys();
+		for(int i = 0; i < stationsKeys.size(); i++) {
+			shortRoutes.put(stationsKeys.get(i), new Station("Westside", Integer.MAX_VALUE));
+		}
+		/* The above initializes the shortRoutes map according to the instructions */
 		
+		/* Creates a sorted stack of the stations according to their distances */
+		List<Integer> stationsValues = stations.getValues();
+		for(int j = 0; j < stationsKeys.size(); j++) {
+			sortStack(stationsKeys.get(j), toVisit);
+		}
 	}
 
 	/* Method: Receives a Stack that needs to remain sorted and the station we want to add. */
@@ -158,23 +170,6 @@ public class TrainStationManager {
 	public String traceRoute(String stationName) {
 		// Remove if you implement the method, otherwise LEAVE ALONE
 		throw new UnsupportedOperationException();
-	}
-	
-	// Method used only for debugging purposes! Remove before submitting
-	public static void main(String[] args) {
-	    TrainStationManager manager = new TrainStationManager("stations.csv");
-	    Map<String, List<Station>> stationsMap = manager.getStations();
-	    
-	    for (String city : stationsMap.getKeys()) {
-	        System.out.println("City: " + city);
-	        System.out.println("Stations:");
-	        List<Station> stationList = stationsMap.get(city);
-	        Iterator<Station> iterator = stationList.iterator();
-	        while (iterator.hasNext()) {
-	            Station station = iterator.next();
-	            System.out.println("Name: " + station.getCityName() + ", Distance: " + station.getDistance());
-	        }
-	    }
 	}
 
 }
