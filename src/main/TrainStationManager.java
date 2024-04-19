@@ -74,6 +74,7 @@ public class TrainStationManager {
 		
 		/* Calls findShortestDistance() for "Westside" so that the shortest
 		routes will be in reference to Westside. */
+		findShortestDistance();
 	}
 	
 	/* Method: Calculates the shortest route from “Westside” to every other station following 
@@ -82,34 +83,34 @@ public class TrainStationManager {
 	private void findShortestDistance() {
 
 		/* Initializes the shortRoutes map according to the instructions */
-		List<String> stationsKeys = stations.getKeys();
+		List<String> stationsKeys = this.stations.getKeys();
 		for(String str : stationsKeys) {
-			shortRoutes.put(str, new Station("Westside", Integer.MAX_VALUE));
+			this.shortRoutes.put(str, new Station("Westside", Integer.MAX_VALUE));
 		}
 		
 		Stack<Station> toVisit = new LinkedStack<Station>();
 		HashSet<Station> visited = new HashSet<Station>();
 		
 		/* Initiates "Westside" into the map and toVisit, then 'visited' */
-		shortRoutes.put("Westside", new Station("Westside", 0));
+		this.shortRoutes.put("Westside", new Station("Westside", 0));
 		sortStack(new Station("Westside", 0), toVisit);
 		visited.add(new Station("Westside", 0));
 		
-		List<Station> valuesWestside = stations.get("Westside"); // Stores stations connected to the starting point (Westside)
+		List<Station> valuesWestside = this.stations.get("Westside"); // Stores stations connected to the starting point (Westside)
 		
 		for(Station s : valuesWestside) {
 			if(!visited.isMember(s)) { // If the station isn't in the 'visited' set...
 				sortStack(s, toVisit); // ... it adds each station connected to Westside into the toVisit stack
 				
 				/* Initializes the values of the stations connected to the starting point */
-				shortRoutes.put(s.getCityName(), new Station("Westside", s.getDistance()));
+				this.shortRoutes.put(s.getCityName(), new Station("Westside", s.getDistance()));
 			}
 		}
 		
 		while(!toVisit.isEmpty()) {
 			Station temp = toVisit.pop(); // Next station to visit
 			
-			List<Station> tempValues = stations.get(temp.getCityName()); // Stores that stations' connections
+			List<Station> tempValues = this.stations.get(temp.getCityName()); // Stores that stations' connections
 			
 			for(Station t : tempValues) { /* Iterates through each 
 			* station that is connected to the station that is being visited */
@@ -120,12 +121,12 @@ public class TrainStationManager {
 				
 				/* Variable: stores the sum of t's distance with the shortest distance 
 				 * of temp that is already in the shortRoutes */
-				int addition = t.getDistance() + shortRoutes.get(temp.getCityName()).getDistance();
+				int addition = t.getDistance() + this.shortRoutes.get(temp.getCityName()).getDistance();
 				
-				if(addition < shortRoutes.get(t.getCityName()).getDistance()) {
+				if(addition < this.shortRoutes.get(t.getCityName()).getDistance()) {
 					/* Replaces the shortest distance of 't' in shortRoutes 
 					 * with a station of city_name being 'temp' */
-					shortRoutes.put(t.getCityName(), new Station(temp.getCityName(), addition)); 
+					this.shortRoutes.put(t.getCityName(), new Station(temp.getCityName(), addition)); 
 				}
 				
 				/* If the station isn't connected to the starting point and it hasn't been visited, it
@@ -140,34 +141,22 @@ public class TrainStationManager {
 	/* Method: Receives a Stack that needs to remain sorted and the station we want to add. */
 	public void sortStack(Station station, Stack<Station> stackToSort) {
 		// Created algorithm to keep the stack sorted (Reference: "How do we keep the stack sorted?" section)
-		stackToSort.push(station);
-		
-		/* Stacks for comparison */
-		Stack<Station> firstStack = new LinkedStack<Station>();
-		Stack<Station> secondStack = new LinkedStack<Station>();
-		
-		secondStack.push(stackToSort.pop());
-		
-		// Populating secondStack whilst stackToSort has no duplicates
-		// Function: Sorts stackToSort into secondStack
-		while(!stackToSort.isEmpty()) {
-			if(stackToSort.top().getDistance() > secondStack.top().getDistance()) {
-				secondStack.push(stackToSort.pop());
-			} else {
-				while(!secondStack.isEmpty() && stackToSort.top().getDistance() < secondStack.top().getDistance()) {
-					firstStack.push(secondStack.pop());
-				}
-				secondStack.push(stackToSort.pop());
-				while(!firstStack.isEmpty()) { // Restore secondStack back with all objs in order
-					secondStack.push(firstStack.pop());
-				}
-			}
-		}
-		
-		// Puts all values in sorted stack into stackToSort
-		while(!secondStack.isEmpty()) {
-			stackToSort.push(secondStack.pop());
-		}
+	
+	    Stack<Station> tempStack = new LinkedStack<Station>();
+	    
+        // Pop elements from the original stack and push them onto the temporary stack
+        // until the original stack is empty or the top element is greater than the station to be added.
+        while (!stackToSort.isEmpty() && stackToSort.top().getDistance() < station.getDistance()) {
+            tempStack.push(stackToSort.pop());
+        }
+
+        // Push the station to be added onto the temporary stack.
+        tempStack.push(station);
+
+        // Pop elements from the temporary stack and push them back onto the original stack.
+        while (!tempStack.isEmpty()) {
+            stackToSort.push(tempStack.pop());
+        }
 	}
 	
 	/* Method: Returns a Map where the key is the station name, and the value is 
@@ -190,7 +179,7 @@ public class TrainStationManager {
 
 
 	public Map<String, Station> getShortestRoutes() {
-		findShortestDistance();
+//		findShortestDistance();
 		return this.shortRoutes;
 	}
 
@@ -214,28 +203,28 @@ public class TrainStationManager {
 	}
 	
 	// ONLY FOR DEBUGGING - REMOVE THE METHOD BELOW BEFORE SUBMITTING!
-//	public static void main(String[] args) {
-//	    TrainStationManager manager = new TrainStationManager("stations.csv");
-//	    // Assuming you have loaded data into shortRoutes somewhere in your code
-//	    Map<String, Station> shortRoutes = manager.getShortestRoutes();
-//	    System.out.println("Shortest Routes:");
-//	    List<String> shortRoutesKeys = shortRoutes.getKeys();
-//	    List<Station> shortRoutesValues = shortRoutes.getValues();
-//	    
-//	    // Debugging statements
-//	    System.out.println("Number of keys: " + shortRoutesKeys.size());
-//	    System.out.println("Number of values: " + shortRoutesValues.size());
-//	    
-//	    // Print contents of shortRoutesValues
-//	    for (Station station : shortRoutesValues) {
-//	        System.out.println(station);
-//	    }
-//	    
-//	    for (int i = 0; i < shortRoutesKeys.size() ; i++) {
-//	        Station station = shortRoutesValues.get(i);
-//	        System.out.println(shortRoutesKeys.get(i) + ": " + station.getCityName() + " - " + station.getDistance());
-//	    }
-//	}
+	public static void main(String[] args) {
+	    TrainStationManager manager = new TrainStationManager("stations.csv");
+	    // Assuming you have loaded data into shortRoutes somewhere in your code
+	    Map<String, Station> shortRoutes = manager.getShortestRoutes();
+	    System.out.println("Shortest Routes:");
+	    List<String> shortRoutesKeys = shortRoutes.getKeys();
+	    List<Station> shortRoutesValues = shortRoutes.getValues();
+	    
+	    // Debugging statements
+	    System.out.println("Number of keys: " + shortRoutesKeys.size());
+	    System.out.println("Number of values: " + shortRoutesValues.size());
+	    
+	    // Print contents of shortRoutesValues
+	    for (Station station : shortRoutesValues) {
+	        System.out.println(station);
+	    }
+	    
+	    for (int i = 0; i < shortRoutesKeys.size() ; i++) {
+	        Station station = shortRoutesValues.get(i);
+	        System.out.println(shortRoutesKeys.get(i) + ": " + station.getCityName() + " - " + station.getDistance());
+	    }
+	}
 
 
 }
