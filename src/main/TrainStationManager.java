@@ -94,49 +94,53 @@ public class TrainStationManager {
 		/* Initiates "Westside" into the map and toVisit, then 'visited' */
 		this.shortRoutes.put("Westside", new Station("Westside", 0));
 		sortStack(new Station("Westside", 0), toVisit);
-		visited.add(new Station("Westside", 0));
 		
-		List<Station> valuesWestside = this.stations.get("Westside"); // Stores stations connected to the starting point (Westside)
-		
-		for(Station s : valuesWestside) {
-			if(!visited.isMember(s)) { // If the station isn't in the 'visited' set...
-				sortStack(s, toVisit); // ... it adds each station connected to Westside into the toVisit stack
-				
-				/* Initializes the values of the stations connected to the starting point */
-				this.shortRoutes.put(s.getCityName(), new Station("Westside", s.getDistance()));
-			}
-		}
+//		List<Station> valuesWestside = this.stations.get("Westside"); // Stores stations connected to the starting point (Westside)
+//		
+//		for(Station s : valuesWestside) {
+//			if(!visited.isMember(s)) { // If the station isn't in the 'visited' set...
+//				sortStack(s, toVisit); // ... it adds each station connected to Westside into the toVisit stack
+//				
+//				/* Initializes the values of the stations connected to the starting point */
+//				this.shortRoutes.put(s.getCityName(), new Station("Westside", s.getDistance()));
+//			}
+//		}
 		
 		while(!toVisit.isEmpty()) {
-			Station temp = toVisit.pop(); // Next station to visit
+			Station currentStation = toVisit.pop(); // Next station to visit
 			
-			List<Station> tempValues = this.stations.get(temp.getCityName()); // Stores that stations' connections
+			List<Station> neighbors = this.stations.get(currentStation.getCityName()); // Stores that stations' connections
 			
-			for(Station t : tempValues) { /* Iterates through each 
+			for(Station s : neighbors) { /* Iterates through each 
 			* station that is connected to the station that is being visited */
 				
-				if(t == null) {
+				if(s == null) { // Edge case
 					break;
 				}
 				
-				/* Variable: stores the sum of t's distance with the shortest distance 
-				 * of temp that is already in the shortRoutes */
-				int addition = t.getDistance() + this.shortRoutes.get(temp.getCityName()).getDistance();
+				if(!visited.isEmpty() && visited.isMember(currentStation)) {
+					break;
+				}
 				
-				if(addition < this.shortRoutes.get(t.getCityName()).getDistance()) {
-					/* Replaces the shortest distance of 't' in shortRoutes 
-					 * with a station of city_name being 'temp' */
-					this.shortRoutes.put(t.getCityName(), new Station(temp.getCityName(), addition)); 
+				/* Variable: stores the sum of the distance of variable 's' with the shortest distance 
+				 * of currentStation that is already in the shortRoutes */
+				int addition = s.getDistance() + this.shortRoutes.get(currentStation.getCityName()).getDistance();
+				
+				if(addition < this.shortRoutes.get(s.getCityName()).getDistance()) {
+					/* Replaces the shortest distance of 's' in shortRoutes 
+					 * with a station of city_name being 'currentStation' */
+					this.shortRoutes.put(s.getCityName(), new Station(currentStation.getCityName(), addition)); 
 				}
 				
 				/* If the station isn't connected to the starting point and it hasn't been visited, it
 				is added to the toVisit stack */
-				if(!visited.isMember(t)) {
-					sortStack(t, toVisit);
+				if(!visited.isMember(s)) {
+					sortStack(s, toVisit);
 				}
 			}
 			
-			visited.add(temp);
+			visited.add(currentStation);
+
 		}
 	}
 
@@ -177,7 +181,6 @@ public class TrainStationManager {
 			Station s = shortRoutesVals.get(i);
 			mult = s.getDistance() * 2.5;
 			
-//			String dest_city = shortRoutesKeys.get(i);
 			String shortRouteCity = s.getCityName();
 			while(!shortRouteCity.equals("Westside")) {
 				mult += 15;
@@ -222,65 +225,67 @@ public class TrainStationManager {
 		// Remove if you implement the method, otherwise LEAVE ALONE
 		throw new UnsupportedOperationException();
 	}
-	    
-	    public static void main(String[] args) {
-	        TrainStationManager manager = new TrainStationManager("stations.csv");
-	        
-	        // Print stations map
-	        System.out.println("Stations Map:");
-	        Map<String, List<Station>> stationsMap = manager.getStations();
-	        for (String city : stationsMap.getKeys()) {
-	            System.out.println(city + ": " + stationsMap.get(city));
-	        }
-	        
-	        // Print shortest routes map
-	        System.out.println("\nShortest Routes:");
-	        Map<String, Station> shortRoutes = manager.getShortestRoutes();
-	        List<String> shortRoutesKeys = shortRoutes.getKeys();
-	        for (String key : shortRoutesKeys) {
-	            Station station = shortRoutes.get(key);
-	            System.out.println(key + ": " + station.getCityName() + " - " + station.getDistance() + " km");
-	        }
-	        
-	        // Print travel times calculations
-	        System.out.println("\nCalculating Travel Times:");
-	        List<Station> shortRoutesValues = manager.getShortestRoutes().getValues();
-	        
-	        // Calculate and print travel times
-	        Map<String, Double> travelTimes = manager.getTravelTimes();
-	        for (int i = 0; i < shortRoutesKeys.size(); i++) {
-	            Station station = shortRoutesValues.get(i);
-	            double time = 0.0;
-	            String stationName = shortRoutesKeys.get(i);
-	            int distance = station.getDistance();
-	            
-	            System.out.print(stationName + ": ");
-	            
-	            // Calculate time based on distance
-	            double timePerKm = 2.5;
-	            double timePerStation = 15.0;
-	            time = distance * timePerKm;
-	            System.out.print("Distance: " + distance + " km, ");
-	            
-	            // Add additional time for non-Westside stations
-	            if (!stationName.equals("Westside")) {
-	                time += timePerStation;
-	                System.out.print("Additional time: " + timePerStation + " minutes, ");
-	            }
-	            
-	            // Print total travel time for the station
-	            System.out.println("Total Travel Time: " + time + " minutes");
-	            
-	            // Update travel times map
-	            travelTimes.put(stationName, time);
-	        }
-	        
-	        // Print travel times map
-	        System.out.println("\nTravel Times:");
-	        for (String station : travelTimes.getKeys()) {
-	            System.out.println(station + ": " + travelTimes.get(station) + " minutes");
-	        }
-	    }
+	
+	/* CODE BELOW IS SOLELY FOR DEBUGGING PURPOSES! */
+	
+//    public static void main(String[] args) {
+//        TrainStationManager manager = new TrainStationManager("personalTester.csv");
+//        
+//        // Print stations map
+//        System.out.println("Stations Map:");
+//        Map<String, List<Station>> stationsMap = manager.getStations();
+//        for (String city : stationsMap.getKeys()) {
+//            System.out.println(city + ": " + stationsMap.get(city));
+//        }
+//        
+//        // Print shortest routes map
+//        System.out.println("\nShortest Routes:");
+//        Map<String, Station> shortRoutes = manager.getShortestRoutes();
+//        List<String> shortRoutesKeys = shortRoutes.getKeys();
+//        for (String key : shortRoutesKeys) {
+//            Station station = shortRoutes.get(key);
+//            System.out.println(key + ": " + station.getCityName() + " - " + station.getDistance() + " km");
+//        }
+//        
+//        // Print travel times calculations
+//        System.out.println("\nCalculating Travel Times:");
+//        List<Station> shortRoutesValues = manager.getShortestRoutes().getValues();
+//        
+//        // Calculate and print travel times
+//        Map<String, Double> travelTimes = manager.getTravelTimes();
+//        for (int i = 0; i < shortRoutesKeys.size(); i++) {
+//            Station station = shortRoutesValues.get(i);
+//            double time = 0.0;
+//            String stationName = shortRoutesKeys.get(i);
+//            int distance = station.getDistance();
+//            
+//            System.out.print(stationName + ": ");
+//            
+//            // Calculate time based on distance
+//            double timePerKm = 2.5;
+//            double timePerStation = 15.0;
+//            time = distance * timePerKm;
+//            System.out.print("Distance: " + distance + " km, ");
+//            
+//            // Add additional time for non-Westside stations
+//            if (!stationName.equals("Westside")) {
+//                time += timePerStation;
+//                System.out.print("Additional time: " + timePerStation + " minutes, ");
+//            }
+//            
+//            // Print total travel time for the station
+//            System.out.println("Total Travel Time: " + time + " minutes");
+//            
+//            // Update travel times map
+//            travelTimes.put(stationName, time);
+//        }
+//        
+//        // Print travel times map
+//        System.out.println("\nTravel Times:");
+//        for (String station : travelTimes.getKeys()) {
+//            System.out.println(station + ": " + travelTimes.get(station) + " minutes");
+//        }
+//    }
 
 
 
