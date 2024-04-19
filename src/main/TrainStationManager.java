@@ -135,6 +135,8 @@ public class TrainStationManager {
 					sortStack(t, toVisit);
 				}
 			}
+			
+			visited.add(temp);
 		}
 	}
 
@@ -164,7 +166,27 @@ public class TrainStationManager {
 	public Map<String, Double> getTravelTimes() {
 		// 2.5 minutes per kilometer (use the shortest distance for this)
 		// 15 min per station (between Westside and the destination)
-		throw new UnsupportedOperationException();
+		
+		Map<String, Double> travelTimes = new HashTableSC<>(1, new SimpleHashFunction<>());
+		
+		List<Station> shortRoutesVals = shortRoutes.getValues();
+		List<String> shortRoutesKeys = shortRoutes.getKeys();
+		
+		Double mult = 1.0; // Initialization of variable that'll store the multiplication
+		for(int i = 0; i < shortRoutesVals.size(); i++) {
+			Station s = shortRoutesVals.get(i);
+			mult = s.getDistance() * 2.5;
+			
+//			String dest_city = shortRoutesKeys.get(i);
+			String shortRouteCity = s.getCityName();
+			while(!shortRouteCity.equals("Westside")) {
+				mult += 15;
+				shortRouteCity = shortRoutes.get(shortRouteCity).getCityName();
+			}
+			travelTimes.put(shortRoutesKeys.get(i), mult);
+		}
+		
+		return travelTimes;
 	}
 
 
@@ -179,7 +201,6 @@ public class TrainStationManager {
 
 
 	public Map<String, Station> getShortestRoutes() {
-//		findShortestDistance();
 		return this.shortRoutes;
 	}
 
@@ -201,30 +222,66 @@ public class TrainStationManager {
 		// Remove if you implement the method, otherwise LEAVE ALONE
 		throw new UnsupportedOperationException();
 	}
-	
-	// ONLY FOR DEBUGGING - REMOVE THE METHOD BELOW BEFORE SUBMITTING!
-	public static void main(String[] args) {
-	    TrainStationManager manager = new TrainStationManager("stations.csv");
-	    // Assuming you have loaded data into shortRoutes somewhere in your code
-	    Map<String, Station> shortRoutes = manager.getShortestRoutes();
-	    System.out.println("Shortest Routes:");
-	    List<String> shortRoutesKeys = shortRoutes.getKeys();
-	    List<Station> shortRoutesValues = shortRoutes.getValues();
 	    
-	    // Debugging statements
-	    System.out.println("Number of keys: " + shortRoutesKeys.size());
-	    System.out.println("Number of values: " + shortRoutesValues.size());
-	    
-	    // Print contents of shortRoutesValues
-	    for (Station station : shortRoutesValues) {
-	        System.out.println(station);
+	    public static void main(String[] args) {
+	        TrainStationManager manager = new TrainStationManager("stations.csv");
+	        
+	        // Print stations map
+	        System.out.println("Stations Map:");
+	        Map<String, List<Station>> stationsMap = manager.getStations();
+	        for (String city : stationsMap.getKeys()) {
+	            System.out.println(city + ": " + stationsMap.get(city));
+	        }
+	        
+	        // Print shortest routes map
+	        System.out.println("\nShortest Routes:");
+	        Map<String, Station> shortRoutes = manager.getShortestRoutes();
+	        List<String> shortRoutesKeys = shortRoutes.getKeys();
+	        for (String key : shortRoutesKeys) {
+	            Station station = shortRoutes.get(key);
+	            System.out.println(key + ": " + station.getCityName() + " - " + station.getDistance() + " km");
+	        }
+	        
+	        // Print travel times calculations
+	        System.out.println("\nCalculating Travel Times:");
+	        List<Station> shortRoutesValues = manager.getShortestRoutes().getValues();
+	        
+	        // Calculate and print travel times
+	        Map<String, Double> travelTimes = manager.getTravelTimes();
+	        for (int i = 0; i < shortRoutesKeys.size(); i++) {
+	            Station station = shortRoutesValues.get(i);
+	            double time = 0.0;
+	            String stationName = shortRoutesKeys.get(i);
+	            int distance = station.getDistance();
+	            
+	            System.out.print(stationName + ": ");
+	            
+	            // Calculate time based on distance
+	            double timePerKm = 2.5;
+	            double timePerStation = 15.0;
+	            time = distance * timePerKm;
+	            System.out.print("Distance: " + distance + " km, ");
+	            
+	            // Add additional time for non-Westside stations
+	            if (!stationName.equals("Westside")) {
+	                time += timePerStation;
+	                System.out.print("Additional time: " + timePerStation + " minutes, ");
+	            }
+	            
+	            // Print total travel time for the station
+	            System.out.println("Total Travel Time: " + time + " minutes");
+	            
+	            // Update travel times map
+	            travelTimes.put(stationName, time);
+	        }
+	        
+	        // Print travel times map
+	        System.out.println("\nTravel Times:");
+	        for (String station : travelTimes.getKeys()) {
+	            System.out.println(station + ": " + travelTimes.get(station) + " minutes");
+	        }
 	    }
-	    
-	    for (int i = 0; i < shortRoutesKeys.size() ; i++) {
-	        Station station = shortRoutesValues.get(i);
-	        System.out.println(shortRoutesKeys.get(i) + ": " + station.getCityName() + " - " + station.getDistance());
-	    }
-	}
+
 
 
 }
