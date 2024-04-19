@@ -17,6 +17,18 @@ import main.Station;
 import data_structures.LinkedStack;
 import data_structures.HashSet;
 
+/**
+ * Class that manipulates two maps, one (shortRoutes) that handles the shortest 
+ * distances between stations according to Westside and another (stations) that
+ * shows how each station is interconnected. Additionally, it shows the amount of time
+ * it takes to get to these stations from Westside. Other than that, it has a method
+ * that helps with the sorting of a stack.
+ * <p>
+ * The combination of HashTableSC and ArrayList data structures 
+ * ensures efficient storage, retrieval, and manipulation of station 
+ * data and shortest route information, making the algorithm well-suited 
+ * for handling large datasets and frequent queries.
+ */
 public class TrainStationManager {
 	
 	private Map<String, List<Station>> stations = new HashTableSC<>(1, new SimpleHashFunction<>());
@@ -27,7 +39,21 @@ public class TrainStationManager {
 	private int distance;
 	private Map<String, Station> shortRoutes = new HashTableSC<>(1, new SimpleHashFunction<>());
 	
-	/* Method: Reads the file given by station_file and populates the stations map */
+	/** Constructor: Reads the file given by station_file and populates the stations map 
+	 * <p>
+	 * Efficiently populates the `stations` map using 
+	 * two ArrayLists for storing the stations connected to each city. ArrayLists are efficient 
+	 * for this task because they provide constant-time access to elements by index, which is 
+	 * essential for quickly accessing and updating the list of connected stations for each city. 
+	 * Additionally, ArrayLists dynamically resize to accommodate any number of stations, 
+	 * ensuring efficient memory utilization without the need for manual resizing. 
+	 * By using ArrayLists, the algorithm ensures fast access to station data and dynamic
+	 *  scalability to handle varying numbers of stations, making it well-suited for 
+	 *  processing large datasets of train station information.
+	 * <p>
+	 * @param station_file which represents the file from where the information of stations
+	 * will be retrieved from.
+	 */
 	public TrainStationManager(String station_file) {
 		
 		try (BufferedReader reader = new BufferedReader(new FileReader("inputFiles/" + station_file))) {
@@ -77,9 +103,27 @@ public class TrainStationManager {
 		findShortestDistance();
 	}
 	
-	/* Method: Calculates the shortest route from “Westside” to every other station following 
+	/** Method: Calculates the shortest route from “Westside” to every other station following 
 	 * the logic given in the “Shortcuts to Victory” section. It populates
-	 * the shortest route map. */
+	 * the shortest route map. 
+	 * <p>
+	 * The algorithm uses three main data structures: a map (`shortRoutes`), a stack (`toVisit`), 
+	 * and a set (`visited`). The `shortRoutes` map is efficiently initialized by 
+	 * iterating through the keys of the `stations` map and setting the value for 
+	 * each key to a new `Station` object with a maximum integer distance, which 
+	 * ensures that the shortest route can be updated later. The `toVisit` stack 
+	 * is implemented as a linked stack (`LinkedStack`), which efficiently supports 
+	 * push and pop operations, making it suitable for maintaining the order of stations 
+	 * to visit. The `visited` set, implemented as a hash set (`HashSet`), efficiently 
+	 * checks for membership of visited stations, ensuring that stations are not 
+	 * revisited unnecessarily. 
+	 * <p>
+	 * These data structures are efficient for this algorithm because they provide fast
+	 *  insertion, retrieval, and membership checking operations, which are essential 
+	 *  for finding the shortest distance from "Westside" to every other station. 
+	 *  Additionally, the linked stack and hash set implementations offer O(1) time 
+	 *  complexity for most operations, ensuring optimal performance.
+	 */
 	private void findShortestDistance() {
 
 		/* Initializes the shortRoutes map according to the instructions */
@@ -144,7 +188,22 @@ public class TrainStationManager {
 		}
 	}
 
-	/* Method: Receives a Stack that needs to remain sorted and the station we want to add. */
+	/** Method: Receives a Stack that needs to remain sorted and the station we want to add.
+	 * <p>
+	 * It is sorted from shortest to longest.
+	 * <p>
+	 * It efficiently uses a temporary stack 
+	 * implemented using a linked list. This approach allows for constant-time 
+	 * insertion and deletion operations, ensuring the efficient sorting of 
+	 * the stack. By iterating through the original stack once and transferring 
+	 * elements back in the correct order after adding the new station,
+	 *  the algorithm effectively maintains the sorted order, making it a suitable 
+	 *  choice for sorting stacks with minimal overhead. 
+	 * <p>
+	 * @param station that will be sorted into the given stack
+	 * @param stackToSort represents the stack that will be sorted according to the station
+	 * to be added to it
+	 */
 	public void sortStack(Station station, Stack<Station> stackToSort) {
 		// Created algorithm to keep the stack sorted (Reference: "How do we keep the stack sorted?" section)
 	
@@ -165,8 +224,20 @@ public class TrainStationManager {
         }
 	}
 	
-	/* Method: Returns a Map where the key is the station name, and the value is 
-	 * the time it takes to reach that station. */
+	/** A method that shows the amount of time that it takes to get to each station in the
+	 * 'stations' map.
+	 * <p>
+	 * The algorithm efficiently calculates travel times between 
+	 * stations using a hash table to store the results and lists 
+	 * to iterate over the shortest routes. The hash table provides 
+	 * fast key-based operations, while the lists ensure ordered traversal 
+	 * through the shortest routes for accurate time calculations. By 
+	 * combining these data structures, the algorithm achieves both efficiency 
+	 * and accuracy in calculating travel times.
+	 * <p>
+	 * @return a map where the key is the station name, and the value is 
+	 * the time it takes to reach that station. 
+	 */
 	public Map<String, Double> getTravelTimes() {
 		// 2.5 minutes per kilometer (use the shortest distance for this)
 		// 15 min per station (between Westside and the destination)
@@ -191,23 +262,46 @@ public class TrainStationManager {
 		
 		return travelTimes;
 	}
-
-
+	
+	/**
+	 * Method that gets the map that represents the connection between each station.
+	 * <p>
+	 * @return the global map of 'stations'
+	 */
 	public Map<String, List<Station>> getStations() {
 		return this.stations;
 	}
+	
 
-
+	/**
+	 * Method that sets the map that represents the connection between each station.
+	 * <p>
+	 * @param cities which represents the map that will replace the current
+	 * 'stations' map.
+	 */
 	public void setStations(Map<String, List<Station>> cities) {
 		this.stations = cities;
 	}
-
-
+	
+	
+	/**
+	 * Method that gets the map that represents the 
+	 * shortest route from Westside to the other stations.
+	 * <p>
+	 * @return the global map of 'shortRoutes'
+	 */
 	public Map<String, Station> getShortestRoutes() {
 		return this.shortRoutes;
 	}
+	
 
-
+	/**
+	 * Method that sets the map that represents the 
+	 * shortest route from Westside to the other stations.
+	 * <p>
+	 * @param shortestRoutes which represents the map that will replace the current
+	 * 'shortRoutes' map.
+	 */
 	public void setShortestRoutes(Map<String, Station> shortestRoutes) {
 		this.shortRoutes = shortestRoutes;
 	}
