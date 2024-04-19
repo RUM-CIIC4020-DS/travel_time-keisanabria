@@ -11,6 +11,7 @@ import java.io.IOException;
 
 import data_structures.HashTableSC;
 import data_structures.SimpleHashFunction;
+import data_structures.SinglyLinkedList;
 import data_structures.ArrayList;
 import main.Station;
 import data_structures.LinkedStack;
@@ -24,11 +25,7 @@ public class TrainStationManager {
 	private String stationString;
 	private String dest_city;
 	private int distance;
-	private Map<String, Station> shortRoutes = new HashTableSC<>(1, new SimpleHashFunction<>()); 
-	private Stack<Station> sortedStack = new LinkedStack<Station>();
-	private Stack<Station> tempStack = new LinkedStack<Station>();
-	private Stack<Station> toVisit = new LinkedStack<Station>();
-	private HashSet<Station> visited = new HashSet<Station>();
+	private Map<String, Station> shortRoutes = new HashTableSC<>(1, new SimpleHashFunction<>());
 	
 	/* Method: Reads the file given by station_file and populates the stations map */
 	public TrainStationManager(String station_file) {
@@ -83,16 +80,60 @@ public class TrainStationManager {
 	 * the logic given in the “Shortcuts to Victory” section. It populates
 	 * the shortest route map. */
 	private void findShortestDistance() {
+
+		/* Initializes the shortRoutes map according to the instructions */
 		List<String> stationsKeys = stations.getKeys();
-		for(int i = 0; i < stationsKeys.size(); i++) {
-			shortRoutes.put(stationsKeys.get(i), new Station("Westside", Integer.MAX_VALUE));
+		for(String str : stationsKeys) {
+			shortRoutes.put(str, new Station("Westside", Integer.MAX_VALUE));
 		}
-		/* The above initializes the shortRoutes map according to the instructions */
 		
-		/* Creates a sorted stack of the stations according to their distances */
-		List<Integer> stationsValues = stations.getValues();
-		for(int j = 0; j < stationsKeys.size(); j++) {
-			sortStack(stationsKeys.get(j), toVisit);
+		Stack<Station> toVisit = new LinkedStack<Station>();
+		HashSet<Station> visited = new HashSet<Station>();
+		
+		/* Initiates "Westside" into the map and toVisit, then 'visited' */
+		shortRoutes.put("Westside", new Station("Westside", 0));
+		sortStack(new Station("Westside", 0), toVisit);
+		visited.add(new Station("Westside", 0));
+		
+		List<Station> valuesWestside = stations.get("Westside"); // Stores stations connected to the starting point (Westside)
+		
+		for(Station s : valuesWestside) {
+			if(!visited.isMember(s)) { // If the station isn't in the 'visited' set...
+				sortStack(s, toVisit); // ... it adds each station connected to Westside into the toVisit stack
+				
+				/* Initializes the values of the stations connected to the starting point */
+				shortRoutes.put(s.getCityName(), new Station("Westside", s.getDistance()));
+			}
+		}
+		
+		while(!toVisit.isEmpty()) {
+			Station temp = toVisit.pop(); // Next station to visit
+			
+			List<Station> tempValues = stations.get(temp.getCityName()); // Stores that stations' connections
+			
+			for(Station t : tempValues) { /* Iterates through each 
+			* station that is connected to the station that is being visited */
+				
+				if(t == null) {
+					break;
+				}
+				
+				/* Variable: stores the sum of t's distance with the shortest distance 
+				 * of temp that is already in the shortRoutes */
+				int addition = t.getDistance() + shortRoutes.get(temp.getCityName()).getDistance();
+				
+				if(addition < shortRoutes.get(t.getCityName()).getDistance()) {
+					/* Replaces the shortest distance of 't' in shortRoutes 
+					 * with a station of city_name being 'temp' */
+					shortRoutes.put(t.getCityName(), new Station(temp.getCityName(), addition)); 
+				}
+				
+				/* If the station isn't connected to the starting point and it hasn't been visited, it
+				is added to the toVisit stack */
+				if(!visited.isMember(t)) {
+					sortStack(t, toVisit);
+				}
+			}
 		}
 	}
 
@@ -134,7 +175,7 @@ public class TrainStationManager {
 	public Map<String, Double> getTravelTimes() {
 		// 2.5 minutes per kilometer (use the shortest distance for this)
 		// 15 min per station (between Westside and the destination)
-		
+		throw new UnsupportedOperationException();
 	}
 
 
@@ -144,18 +185,18 @@ public class TrainStationManager {
 
 
 	public void setStations(Map<String, List<Station>> cities) {
-		
+		this.stations = cities;
 	}
 
 
 	public Map<String, Station> getShortestRoutes() {
-		return null;
-		
+		findShortestDistance();
+		return this.shortRoutes;
 	}
 
 
 	public void setShortestRoutes(Map<String, Station> shortestRoutes) {
-		
+		this.shortRoutes = shortestRoutes;
 	}
 	
 	/**
@@ -171,5 +212,30 @@ public class TrainStationManager {
 		// Remove if you implement the method, otherwise LEAVE ALONE
 		throw new UnsupportedOperationException();
 	}
+	
+	// ONLY FOR DEBUGGING - REMOVE THE METHOD BELOW BEFORE SUBMITTING!
+//	public static void main(String[] args) {
+//	    TrainStationManager manager = new TrainStationManager("stations.csv");
+//	    // Assuming you have loaded data into shortRoutes somewhere in your code
+//	    Map<String, Station> shortRoutes = manager.getShortestRoutes();
+//	    System.out.println("Shortest Routes:");
+//	    List<String> shortRoutesKeys = shortRoutes.getKeys();
+//	    List<Station> shortRoutesValues = shortRoutes.getValues();
+//	    
+//	    // Debugging statements
+//	    System.out.println("Number of keys: " + shortRoutesKeys.size());
+//	    System.out.println("Number of values: " + shortRoutesValues.size());
+//	    
+//	    // Print contents of shortRoutesValues
+//	    for (Station station : shortRoutesValues) {
+//	        System.out.println(station);
+//	    }
+//	    
+//	    for (int i = 0; i < shortRoutesKeys.size() ; i++) {
+//	        Station station = shortRoutesValues.get(i);
+//	        System.out.println(shortRoutesKeys.get(i) + ": " + station.getCityName() + " - " + station.getDistance());
+//	    }
+//	}
+
 
 }
