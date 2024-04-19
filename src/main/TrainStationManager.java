@@ -13,9 +13,11 @@ import data_structures.HashTableSC;
 import data_structures.SimpleHashFunction;
 import data_structures.SinglyLinkedList;
 import data_structures.ArrayList;
+import data_structures.DoublyLinkedList;
 import main.Station;
 import data_structures.LinkedStack;
 import data_structures.HashSet;
+import data_structures.ListQueue;
 
 /**
  * Class that manipulates two maps, one (shortRoutes) that handles the shortest 
@@ -311,16 +313,71 @@ public class TrainStationManager {
 	 * Returns the path to the station given. 
 	 * The format is as follows: Westside->stationA->.....stationZ->stationName
 	 * Each station is connected by an arrow and the trace ends at the station given.
-	 * 
+	 * <p>
+	 * The algorithm efficiently traces the route from a given station to "Westside"
+	 * using a `LinkedStack` data structure. This choice is effective because a stack 
+	 * follows the Last-In-First-Out (LIFO) principle, which aligns well with the
+	 * backward tracing requirement. Each station encountered during the route 
+	 * tracing process is pushed onto the stack, ensuring easy reconstruction 
+	 * of the route in the correct order later. Additionally, a `String` variable
+	 * efficiently builds the route representation by concatenating station 
+	 * names with "->" separators. This approach minimizes memory overhead 
+	 * and ensures fast and memory-efficient route tracing and construction.
+	 * <p>
 	 * @param stationName - Name of the station whose route we want to trace
 	 * @return (String) String representation of the path taken to reach stationName.
 	 */
 	public String traceRoute(String stationName) {
-		// Remove if you implement the method, otherwise LEAVE ALONE
-		throw new UnsupportedOperationException();
+	    String stationInstance = stationName;
+	    String route = "";
+
+	    Stack<String> trace = new LinkedStack<String>();
+
+	    if(!stationInstance.equals("Westside")) {
+	        trace.push(stationInstance);
+	    } else {
+	        return "Westside";
+	    }
+
+	    while (!stationInstance.equals("Westside")) {
+	        Station stationValue = shortRoutes.get(stationInstance);
+	        stationInstance = stationValue.getCityName();
+	        trace.push(stationInstance);
+	    }
+
+	    // Initialize a boolean flag to check if the first station has been processed
+	    boolean firstStationProcessed = false;
+
+	    while (!trace.isEmpty()) {
+	        String nextStation = trace.pop();
+	        // Check if the next station is the first station in the route
+	        if (!firstStationProcessed) {
+	            // Update the route without adding "->" before the first station
+	            route += nextStation;
+	            firstStationProcessed = true;
+	        } else {
+	            // Update the route by adding "->" before stations except the first one
+	            route += "->" + nextStation;
+	        }
+	    }
+
+	    return route;
 	}
-	
+
 	/* CODE BELOW IS SOLELY FOR DEBUGGING PURPOSES! */
+	
+//	public static void main(String[] args) {
+//        TrainStationManager manager = new TrainStationManager("stations.csv");
+//
+//        // Get the map of stations
+//        Map<String, List<Station>> stationsMap = manager.getStations();
+//
+//        // Iterate through each station in the map
+//        for (String city : stationsMap.getKeys()) {
+//            // Print the route to the current station
+//            System.out.println("Route to " + city + ": " + manager.traceRoute(city));
+//        }
+//    }
 	
 //    public static void main(String[] args) {
 //        TrainStationManager manager = new TrainStationManager("personalTester.csv");
